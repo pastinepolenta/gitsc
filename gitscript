@@ -1,0 +1,32 @@
+#!/bin/bash
+# git-add a modified file by its position on the git status list
+
+# usage: alias this script to gitadd or whatever, then on a git repo folder
+# run gitadd 1 3 to git-add the first and the third modified file of the git status list
+
+indexesToGitAdd=$*
+gitStatus=($(git ls-files -m))
+
+# verbose
+# echo $indexesToGitAdd
+# printf -- '%s\n' "${gitStatus[@]}"
+
+# exit if git does not have modified files
+if [ ${#gitStatus[@]} -eq 0 ]; then
+    echo "There are no modified files in git"
+    exit 1
+fi
+
+for fileIndex in $indexesToGitAdd; do
+    # start from 1 instead of 0
+    ((fileIndex=fileIndex-1))
+    # if this fileindex exists on the list of modified files
+    if test $fileIndex -ge 0 -a "${gitStatus[fileIndex]+isset}"
+        then
+            # add this file
+            echo "Adding " ${gitStatus[$fileIndex]}
+            git add ${gitStatus[$fileIndex]}
+        else
+            echo 'No modified file in position' $(($fileIndex+1))
+    fi;
+done
